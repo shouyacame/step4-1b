@@ -79,7 +79,11 @@ def create_purchase(purchase: dict, db: Session = Depends(get_db)):
 
     return {"ok": True, "total": total}
 
-# ✅ すべてのルーティング定義の「最後」に配置すること！
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+import uvicorn
+
+app = FastAPI(title="POS System API")
+
+# CORSやルーティング定義は省略（そのままでOK）
+
+# このブロックの末尾に以下を追加してください
+uvicorn.run(app, host="0.0.0.0", port=8000)
