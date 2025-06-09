@@ -6,6 +6,7 @@ from app.models import models
 from app.schemas import schemas
 from decimal import Decimal
 from typing import Optional
+import uvicorn  # ←ここにimport移動
 
 app = FastAPI(title="POS System API")
 
@@ -45,7 +46,6 @@ def create_purchase(purchase: dict, db: Session = Depends(get_db)):
     pos_no = purchase.get("pos_no") or "90"
     items = purchase.get("items", [])
 
-    # 取引登録
     transaction = models.Transaction(
         emp_cd=emp_cd,
         store_cd=store_cd,
@@ -53,7 +53,7 @@ def create_purchase(purchase: dict, db: Session = Depends(get_db)):
         total_amt=0
     )
     db.add(transaction)
-    db.flush()  # IDを取得
+    db.flush()
 
     total = 0
     for i, item in enumerate(items, 1):
@@ -73,17 +73,9 @@ def create_purchase(purchase: dict, db: Session = Depends(get_db)):
         db.add(detail)
         total += int(product.price)
 
-    # 合計金額を更新
     transaction.total_amt = total
     db.commit()
-
     return {"ok": True, "total": total}
 
-import uvicorn
-
-app = FastAPI(title="POS System API")
-
-# CORSやルーティング定義は省略（そのままでOK）
-
-# このブロックの末尾に以下を追加してください
+# ✅ アプリの実行（__name__ は使わない）
 uvicorn.run(app, host="0.0.0.0", port=8000)
