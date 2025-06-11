@@ -58,6 +58,7 @@ def create_purchase(purchase: dict, db: Session = Depends(get_db)):
     total = 0
     for i, item in enumerate(items, 1):
         prd_id = item.get("prd_id")
+        qty = item.get("qty", 1)  # 数量を取得、デフォルトは1
         product = db.query(models.ProductMaster).filter(models.ProductMaster.id == prd_id).first()
         if not product:
             db.rollback()
@@ -68,10 +69,11 @@ def create_purchase(purchase: dict, db: Session = Depends(get_db)):
             prd_id=product.id,
             prd_code=product.code,
             prd_name=product.name,
-            prd_price=int(product.price)
+            prd_price=int(product.price),
+            qty=qty  # 数量を保存
         )
         db.add(detail)
-        total += int(product.price)
+        total += int(product.price) * qty # 数量を掛けて合計を計算
 
     transaction.total_amt = total
     db.commit()
